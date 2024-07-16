@@ -6,7 +6,7 @@ import Jwt  from "jsonwebtoken";
 import { config } from "../config/config";
 import Iuser from "../types/userTypes";
 
-const createUser = async (req: Request,res: Response,next: NextFunction) => {
+const registerUser = async (req: Request,res: Response,next: NextFunction) => {
     const {name,email,password} = req.body;
 
     try{
@@ -39,9 +39,42 @@ const createUser = async (req: Request,res: Response,next: NextFunction) => {
 
     //token generation
     const token = Jwt.sign({sub: newUser._id}, config.jwtSecret as string,{expiresIn: "7d"}); 
-    res.json({ accessToken: token });
+    res.status(201).json({ accessToken: token });
+}
+
+const loginUser = async (req:Request,res:Response,next:NextFunction) => {
+
+    const {email,password} = req.body;
+
+    //check from the database
+    try{
+        const findUser = await userModel.findOne({email});
+        if(!findUser){
+            return next(createHttpError(404,"User Not Found!"));
+        }
+
+        //check user password is matched in db or not
+        const isMatched = await bcrypt.compare(password,findUser.password)
+
+        if(!isMatched){
+            return next(createHttpError(400,"Username or Password incorrect"));
+        }
+
+        //create access token
+
+        const token = Jwt.sign({sub: findUser._id},config.jwtSecret as string,{expiresIn: "7d"})
+
+        res.json({
+            accessToken: token
+        })
+
+    }
+    catch(error){
+       return next(createHttpError(500,"Error while login user")); 
+    }
 }
 
 export default {
-    createUser
+    registerUser,
+    loginUser
 }
