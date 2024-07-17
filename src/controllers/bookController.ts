@@ -1,9 +1,8 @@
 import { NextFunction, Request, Response } from "express";
 
 const createBook = (req:Request,res:Response,next:NextFunction) => {
-    res.json({
-        message: "Book added successfully!"
-    }) 
+    console.log("files", req.files);
+    res.send({});
 }
 
 export default {
