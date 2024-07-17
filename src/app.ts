@@ -1,6 +1,7 @@
-import express, { NextFunction, Request, Response } from 'express'
+import express from 'express'
 import globalErrorHandler from './middlewares/globalErrorHandler';
 import userRouter from './routes/userRouter';
+import bookRouter from './routes/bookRouter';
 
 const app = express();
 app.use(express.json());
@@ -13,6 +14,7 @@ app.get('/',(req,res,next) => {
 })
 
 app.use("/api/users",userRouter);
+app.use("/api/books",bookRouter);
 
 app.use(globalErrorHandler);
 
