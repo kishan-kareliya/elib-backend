@@ -184,7 +184,10 @@ const getSingleBook = async (
   next: NextFunction
 ) => {
   try {
-    const book = await bookModel.find({ _id: req.params.bookId });
+    const book = await bookModel.findOne({ _id: req.params.bookId });
+    if (!book) {
+      return next(createHttpError(404, "Book not found"));
+    }
     res.status(200).json(book);
   } catch (error) {
     return next(createHttpError(500, "Error while get a single book"));
