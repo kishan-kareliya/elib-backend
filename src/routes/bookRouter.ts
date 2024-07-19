@@ -22,4 +22,14 @@ bookRouter.post(
   bookController.createBook
 );
 
+bookRouter.patch(
+  "/:bookId",
+  authentication,
+  upload.fields([
+    { name: "coverImage", maxCount: 1 },
+    { name: "file", maxCount: 1 },
+  ]),
+  bookController.updateBook
+);
+
 export default bookRouter;
