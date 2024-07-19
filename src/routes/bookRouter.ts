@@ -32,4 +32,6 @@ bookRouter.patch(
   bookController.updateBook
 );
 
+bookRouter.get("/", bookController.getBook);
+
 export default bookRouter;
