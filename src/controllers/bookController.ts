@@ -169,22 +169,31 @@ const updateBook = async (req: Request, res: Response, next: NextFunction) => {
   res.json(updatedBook);
 };
 
-const getBook = async (req: Request, res: Response, next: NextFunction) => {
+const getAllBook = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const books = await bookModel.find({});
-
-    if (!books) {
-      return next(createHttpError(402, "Error while finding book"));
-    }
-
     res.status(200).json(books);
   } catch (error) {
     return next(createHttpError(500, "Error while getting book"));
   }
 };
 
+const getSingleBook = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const book = await bookModel.find({ _id: req.params.bookId });
+    res.status(200).json(book);
+  } catch (error) {
+    return next(createHttpError(500, "Error while get a single book"));
+  }
+};
+
 export default {
   createBook,
   updateBook,
-  getBook,
+  getAllBook,
+  getSingleBook,
 };

@@ -32,6 +32,8 @@ bookRouter.patch(
   bookController.updateBook
 );
 
-bookRouter.get("/", bookController.getBook);
+bookRouter.get("/", bookController.getAllBook);
+
+bookRouter.get("/:bookId", bookController.getSingleBook);
 
 export default bookRouter;
