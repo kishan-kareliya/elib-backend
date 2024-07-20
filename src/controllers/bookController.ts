@@ -120,6 +120,19 @@ const updateBook = async (req: Request, res: Response, next: NextFunction) => {
     //store cloudinary url of coverImage
     completeCoverImage = uploadResult.secure_url;
 
+    //remove old coverImage from cloudinary
+    const coverImageUrlArr = book.coverImage.split("/");
+    const coverImagePublicId =
+      coverImageUrlArr[7] + "/" + coverImageUrlArr[8].split(".")[0];
+
+    try {
+      await cloudinary.uploader.destroy(coverImagePublicId);
+    } catch (error) {
+      return next(
+        createHttpError(502, "Error while delete coverImage from cloudinary")
+      );
+    }
+
     //remove coverImage locally
     await fs.promises.unlink(filePath);
   }
@@ -148,6 +161,20 @@ const updateBook = async (req: Request, res: Response, next: NextFunction) => {
 
     // get pdf file cloudinary stored url
     completePdfFile = uploadPdfResult.secure_url;
+
+    //remove old pdf from cloudinary
+    const fileImageUrlArr = book.file.split("/");
+    const fileImagePublicId = fileImageUrlArr[7] + "/" + fileImageUrlArr[8];
+
+    try {
+      await cloudinary.uploader.destroy(fileImagePublicId, {
+        resource_type: "raw",
+      });
+    } catch (error) {
+      return next(
+        createHttpError(502, "Error while delete pdf file from cloudinary")
+      );
+    }
 
     //remove pdf locally
     await fs.promises.unlink(bookPdfPath);
@@ -219,8 +246,7 @@ const deleteBook = async (req: Request, res: Response, next: NextFunction) => {
     coverImageUrlArr[7] + "/" + coverImageUrlArr[8].split(".")[0];
 
   const fileImageUrlArr = book.file.split("/");
-  const fileImagePublicId =
-    fileImageUrlArr[7] + "/" + fileImageUrlArr[8].split(".")[0];
+  const fileImagePublicId = fileImageUrlArr[7] + "/" + fileImageUrlArr[8];
 
   //delete both the file from cloudinary
   try {
