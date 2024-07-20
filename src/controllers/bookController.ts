@@ -194,9 +194,59 @@ const getSingleBook = async (
   }
 };
 
+const deleteBook = async (req: Request, res: Response, next: NextFunction) => {
+  const { bookId } = req.params;
+
+  //check book exist in db or not
+  const book = await bookModel.findOne({ _id: bookId });
+
+  if (!book) {
+    return next(createHttpError(404, "Book Not Found"));
+  }
+
+  //delete book in the db check user is valid or not
+  const _req = req as AuthRequest;
+  if (_req.userId !== book.author.toString()) {
+    return next(createHttpError(402, "Unauthorized"));
+  }
+
+  //delete coverImage and pdf file from cloudinary for that we need to get publicId
+  //public id look like this: book-covers/w7rscudwgwcpfpgs90km
+  //clodinary url: https://res.cloudinary.com/dt9ueygfu/image/upload/v1721368683/book-covers/w7rscudwgwcpfpgs90km.jpg
+
+  const coverImageUrlArr = book.coverImage.split("/");
+  const coverImagePublicId =
+    coverImageUrlArr[7] + "/" + coverImageUrlArr[8].split(".")[0];
+
+  const fileImageUrlArr = book.file.split("/");
+  const fileImagePublicId =
+    fileImageUrlArr[7] + "/" + fileImageUrlArr[8].split(".")[0];
+
+  //delete both the file from cloudinary
+  try {
+    await cloudinary.uploader.destroy(coverImagePublicId);
+    await cloudinary.uploader.destroy(fileImagePublicId, {
+      resource_type: "raw",
+    });
+  } catch (error) {
+    return next(
+      createHttpError(502, "Error while delete file from cloudinary")
+    );
+  }
+
+  //delete book and pdf from database
+  try {
+    await bookModel.findOneAndDelete({ _id: bookId });
+    return res.sendStatus(204);
+  } catch (error) {
+    return next(createHttpError(500, "Error while delete file from database"));
+  }
+};
+
 export default {
   createBook,
   updateBook,
   getAllBook,
   getSingleBook,
+  deleteBook,
 };
